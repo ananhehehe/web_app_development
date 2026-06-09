@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}任務管理系統{% endblock %}</title>
+    <!-- 引入 Google Fonts (Outfit 與 Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 自訂樣式表 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="glass-background"></div>
+    
+    <div class="app-container">
+        <!-- 頂部導覽列 -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-list-check logo-icon"></i>
+                <span class="logo-text">Taskify</span>
+            </div>
+            <div class="app-subtitle">個人日常任務管理</div>
+        </header>
+
+        <!-- Flash 訊息提示區 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}" id="flash-{{ loop.index }}">
+                            <div class="flash-content">
+                                {% if category == 'success' %}
+                                    <i class="fa-solid fa-circle-check flash-icon"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-circle-exclamation flash-icon"></i>
+                                {% endif %}
+                                <span class="flash-text">{{ message }}</span>
+                            </div>
+                            <button class="flash-close-btn" onclick="closeFlash('flash-{{ loop.index }}')">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 主要內容區 -->
+        <main class="app-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- 頁尾 -->
+        <footer class="app-footer">
+            <p>© 2026 Taskify Inc. 設計於 Antigravity. 確保高效每一天。</p>
+        </footer>
+    </div>
+
+    <!-- 簡易互動 JavaScript -->
+    <script>
+        // 自動關閉 Flash 訊息（5秒後自動淡出）
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach((msg) => {
+                setTimeout(() => {
+                    closeFlash(msg.id);
+                }, 5000);
+            });
+        });
+
+        function closeFlash(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    element.remove();
+                }, 4000); // 配合 CSS transition
+            }
+        }
+    </script>
+</body>
+</html>

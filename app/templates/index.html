@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}首頁 - 任務管理系統{% endblock %}
+
+{% block content %}
+<div class="task-manager-card">
+    <!-- 1. 新增任務區區塊 -->
+    <section class="add-task-section">
+        <form action="{{ url_for('tasks.add_task') }}" method="POST" class="add-task-form">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="title" 
+                    placeholder="今天想要完成什麼任務？" 
+                    maxlength="100" 
+                    required 
+                    autocomplete="off"
+                    class="task-input"
+                >
+                <button type="submit" class="add-btn">
+                    <i class="fa-solid fa-plus btn-icon"></i>
+                    <span>新增任務</span>
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- 2. 篩選標籤區塊 -->
+    <section class="filter-section">
+        <div class="filter-tabs">
+            <a href="{{ url_for('tasks.index', status='all') }}" class="filter-tab {% if current_status == 'all' %}active{% endif %}">
+                <i class="fa-solid fa-folder-open tab-icon"></i>
+                <span>全部</span>
+            </a>
+            <a href="{{ url_for('tasks.index', status='pending') }}" class="filter-tab {% if current_status == 'pending' %}active{% endif %}">
+                <i class="fa-solid fa-clock tab-icon"></i>
+                <span>未完成</span>
+            </a>
+            <a href="{{ url_for('tasks.index', status='completed') }}" class="filter-tab {% if current_status == 'completed' %}active{% endif %}">
+                <i class="fa-solid fa-circle-check tab-icon"></i>
+                <span>已完成</span>
+            </a>
+        </div>
+        <div class="task-count">
+            共 <strong>{{ tasks|length }}</strong> 項任務
+        </div>
+    </section>
+
+    <!-- 3. 任務列表區區塊 -->
+    <section class="task-list-section">
+        {% if tasks %}
+            <ul class="task-list">
+                {% for task in tasks %}
+                    <li class="task-item {% if task.is_completed %}task-completed{% endif %}">
+                        <!-- 切換狀態核取方塊表單 -->
+                        <form action="{{ url_for('tasks.toggle_task', id=task.id) }}" method="POST" class="toggle-form">
+                            <label class="checkbox-container">
+                                <input 
+                                    type="checkbox" 
+                                    {% if task.is_completed %}checked{% endif %} 
+                                    onchange="this.form.submit()"
+                                    class="task-checkbox"
+                                >
+                                <span class="checkmark"></span>
+                            </label>
+                        </form>
+
+                        <!-- 任務標題與時間 -->
+                        <div class="task-info">
+                            <span class="task-title">{{ task.title }}</span>
+                            <span class="task-date">
+                                <i class="fa-regular fa-calendar-plus"></i>
+                                {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </span>
+                        </div>
+
+                        <!-- 刪除任務表單 -->
+                        <form action="{{ url_for('tasks.delete_task', id=task.id) }}" method="POST" class="delete-form" onsubmit="return confirm('確定要永久刪除「{{ task.title }}」嗎？')">
+                            <button type="submit" class="delete-btn" title="刪除任務">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <!-- 空狀態區塊 -->
+            <div class="empty-state">
+                <div class="empty-illustration">
+                    <i class="fa-solid fa-moon empty-icon"></i>
+                </div>
+                <h3>無待辦任務</h3>
+                <p>
+                    {% if current_status == 'pending' %}
+                        做得好！所有的任務都完成了。
+                    {% elif current_status == 'completed' %}
+                        還沒有完成任何任務喔，加油！
+                    {% else %}
+                        目前清單一片空白。在上方填入名稱來新增你的第一個任務吧！
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
